@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I_Love_You.exe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14305c;
+    --sky:#cfe9ff;
+    --sky-2:#a9d6ff;
+    --title:#5ab0ff;
+    --accent:#2f8cff;
+    --paper:#f8fbff;
+    --heart:#4a9dff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;margin:0}
+  body{
+    font-family:"Mali","Sarabun",system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      linear-gradient(rgba(255,255,255,.55) 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg,rgba(255,255,255,.55) 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(180deg,var(--sky),var(--sky-2));
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:18px;padding:16px;overflow:hidden;
+  }
+  .mono{font-family:"Space Mono",ui-monospace,monospace}
+
+  /* ---------- music button ---------- */
+  .music{
+    display:flex;align-items:center;gap:6px;
+    background:var(--paper);color:var(--ink);
+    border:2px solid var(--ink);box-shadow:2px 2px 0 var(--ink);
+    padding:4px 10px;font-size:11px;cursor:pointer;
+  }
+  .music:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+  .bars{display:flex;align-items:flex-end;gap:2px;height:12px}
+  .bars i{width:3px;height:3px;background:var(--ink);display:block}
+  .music.on .bars i{animation:eq .8s ease-in-out infinite alternate}
+  .music.on .bars i:nth-child(2){animation-delay:.15s}
+  .music.on .bars i:nth-child(3){animation-delay:.3s}
+  .music.on .bars i:nth-child(4){animation-delay:.45s}
+  .music.on .bars i:nth-child(5){animation-delay:.6s}
+  @keyframes eq{from{height:3px}to{height:12px}}
+
+  /* ---------- window ---------- */
+  .stage{position:relative;width:min(340px,100%)}
+  .win{
+    background:var(--paper);border:2px solid var(--ink);
+    box-shadow:5px 5px 0 var(--ink);
+  }
+  .titlebar{
+    display:flex;align-items:center;gap:6px;
+    background:var(--title);color:#fff;
+    border-bottom:2px solid var(--ink);
+    padding:3px 6px;font-size:11px;
+  }
+  .titlebar .t{flex:1;letter-spacing:.3px}
+  .titlebar .ctl{display:flex;gap:3px}
+  .titlebar .ctl b{
+    width:13px;height:11px;background:var(--paper);color:var(--ink);
+    border:1.5px solid var(--ink);font-size:8px;line-height:8px;
+    display:grid;place-items:center;
+  }
+  .body{position:relative;min-height:390px;padding:18px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .screen{display:none;width:100%;flex-direction:column;align-items:center;animation:pop .35s ease both}
+  .screen.active{display:flex}
+  @keyframes pop{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+
+  /* ---------- screen 1 ---------- */
+  .char{width:170px;height:170px;display:block;cursor:pointer;object-fit:contain;animation:float 3s ease-in-out infinite}
+  @keyframes float{50%{transform:translateY(-6px)}}
+  .ask{font-size:17px;font-weight:700;margin:10px 0 16px;text-align:center}
+  .row{display:flex;gap:14px;align-items:center;justify-content:center;min-height:62px}
+  .btn{
+    font:inherit;font-weight:700;font-size:13px;color:var(--ink);
+    background:var(--paper);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);
+    padding:6px 14px;cursor:pointer;transition:transform .15s,font-size .15s,padding .15s;
+  }
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.yes{background:#dff0ff;transform-origin:center}
+  .btn.no{transition:transform .2s,opacity .2s}
+  .btn[disabled]{opacity:.55;cursor:default}
+
+  /* ---------- screen 2 ---------- */
+  .chat{
+    width:100%;height:290px;border:2px dashed var(--ink);background:#fff;
+    padding:10px;display:flex;flex-direction:column;gap:7px;overflow:hidden;
+  }
+  .bubble{
+    align-self:flex-start;background:var(--paper);border:1.5px solid var(--ink);
+    border-radius:12px;padding:4px 10px;font-size:11.5px;
+    animation:pop .35s ease both;
+  }
+  .reply{margin-top:12px}
+
+  /* ---------- screen 3 ---------- */
+  .form{width:100%;text-align:left}
+  .form h2{font-size:15px;font-weight:700;text-align:center;letter-spacing:1px;margin:0 0 12px}
+  .form label{display:block;font-size:11.5px;font-weight:700;margin:8px 0 4px}
+  .form input,.form textarea{
+    width:100%;font:inherit;font-size:12.5px;color:var(--ink);
+    background:#fff;border:2px solid var(--ink);padding:6px 8px;outline:none;resize:none;
+  }
+  .form input:focus,.form textarea:focus{box-shadow:0 0 0 3px rgba(47,140,255,.35)}
+  .form textarea{height:110px}
+  .send{width:100%;margin-top:12px;text-align:center}
+
+  /* ---------- success dialog ---------- */
+  .modal{
+    position:absolute;left:50%;top:52%;width:86%;z-index:5;
+    transform:translate(-50%,-50%);display:none;
+  }
+  .modal.show{display:block;animation:modal .4s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes modal{from{opacity:0;transform:translate(-50%,-40%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%)}}
+  .modal .win{box-shadow:4px 4px 0 var(--ink)}
+  .modal .titlebar{background:var(--title)}
+  .modal .inner{padding:20px 14px;text-align:center}
+  .modal h3{margin:0 0 6px;font-size:17px}
+  .modal p{margin:0;font-size:11.5px}
+  .dim{filter:saturate(.6);opacity:.55;pointer-events:none}
+
+  /* ---------- falling hearts ---------- */
+  .heart{
+    position:fixed;top:-30px;color:var(--heart);pointer-events:none;z-index:20;
+    animation:fall linear forwards;text-shadow:0 0 0 #fff;
+  }
+  @keyframes fall{to{transform:translateY(110vh) rotate(var(--r));opacity:.9}}
+  .deco{position:fixed;font-size:13px;color:#6a8fbf;opacity:.8}
+</style>
+</head>
+<body>
+
+<span class="deco" style="left:10px;top:44%">♥</span>
+<span class="deco" style="right:10px;top:42%">♥</span>
+
+<button class="music mono" id="music" type="button" aria-label="toggle music">
+  <span id="musicIcon">▶</span> music
+  <span class="bars"><i></i><i></i><i></i><i></i><i></i></span>
+</button>
+
+<main class="stage" id="stage">
+  <div class="win" id="mainWin">
+    <div class="titlebar mono">
+      <span>♥</span><span class="t">I_Love_You.exe</span>
+      <span class="ctl"><b>_</b><b>□</b><b>X</b></span>
+    </div>
+
+    <div class="body">
+      <!-- 1 : ask -->
+      <section class="screen active" id="s1">
+        <div id="charBox"></div>
+        <div class="ask">เค้ามาง้อดีกันนะคะ🥺</div>
+        <div class="row">
+          <button class="btn yes" id="yes" type="button">โอเคร 💙</button>
+          <button class="btn no" id="no" type="button">ไม่ 😤</button>
+        </div>
+      </section>
+
+      <!-- 2 : chat bubbles -->
+      <section class="screen" id="s2">
+        <div class="chat" id="chat"></div>
+        <button class="btn reply" id="replyBtn" type="button" style="display:none">ตอบกลับเค้าหน่อย 💌</button>
+      </section>
+
+      <!-- 3 : send message -->
+      <section class="screen" id="s3">
+        <form class="form" id="form" autocomplete="off">
+          <h2 class="mono">SEND MESSAGE</h2>
+          <label for="from">From:</label>
+          <input id="from" maxlength="40" placeholder="..." required>
+          <label for="msg">Reply message:</label>
+          <textarea id="msg" maxlength="500" placeholder="feel free to type out what's on your mind..." required></textarea>
+          <button class="btn send" id="sendBtn" type="submit">(Send) 💙</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <!-- success modal -->
+  <div class="modal" id="modal">
+    <div class="win">
+      <div class="titlebar mono"><span>●</span><span class="t">Status: Message Sent</span></div>
+      <div class="inner">
+        <div style="font-size: 36px; margin-bottom: 8px;">🎉</div>
+        <h3>Message sent successfully!</h3>
+        <p style="margin-bottom: 12px; color: #3b5998;">kao dai rab kwam nai jai p laew naka</p>
+        
+        <!-- กล่องแสดงข้อความสรุปเพิ่มเติม -->
+        <div id="sentSummary" style="background: #ffffff; border: 1.5px dashed var(--ink); border-radius: 8px; padding: 10px; font-size: 11px; text-align: left; word-break: break-word;">
+          <div style="font-weight: bold; color: var(--accent); margin-bottom: 4px;">💌 Message details:</div>
+          <div><b>Form:</b> <span id="summaryFrom">-</span></div>
+          <div><b>Message:</b> <span id="summaryMsg">-</span></div>
+        </div>
+
+        <button class="btn" id="closeModalBtn" type="button" style="margin-top: 14px; width: 100%;">agree</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* =====================================================================
+   ตั้งค่าตรงนี้ได้เลย
+   ===================================================================== */
+
+const CHARACTER_SRC = "";
+
+// เพลงจาก YouTube: ใส่ลิงก์เต็มหรือรหัสคลิปตรงนี้ได้เลยครับ
+const YOUTUBE_ID = "";
+
+// ช่องนี้เว้นว่างไว้ เพราะเราใช้ YouTube ด้านบนแล้ว
+const MUSIC_SRC = "song.mp3";
+
+const BUBBLES = [
+  "เค้าขอโทษนะคะ🥹",
+  "ช่วงนี้เค้าทำตัวไม่น่ารักใส่พี่บ่อยครั้ง",
+  "เค้าไม่อยากให้บรรยากาศเป็นแบบนี้แล้วค่ะ",
+  "เค้าง้อๆนะคะ",
+  "พี่คนสวยไม่งอนเค้าแล้วได้มั้ยคะ",
+  "เค้าคิดถึงเค้าอยากคุยกับพี่มากๆเลยนะคะ"
+];
+
+const WEB3FORMS_KEY = "";
+
+async function onSend({ from, message }) {
+  try {
+    const list = JSON.parse(localStorage.getItem("replies") || "[]");
+    list.push({ from, message, at: new Date().toISOString() });
+    localStorage.setItem("replies", JSON.stringify(list));
+  } catch (e) {}
+
+  if (!WEB3FORMS_KEY) return true; 
+  try {
+    const res = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        subject: "💙 มีข้อความตอบกลับจาก " + from,
+        from_name: "I_Love_You.exe",
+        name: from,
+        message: message
+      })
+    });
+    const data = await res.json();
+    return !!data.success;
+  } catch (e) {
+    return false;
+  }
+}
+
+/* ===================================================================== */
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  $(id).classList.add("active");
+};
+
+/* ---------- mascot ---------- */
+const MASCOT_SVG = `
+<svg class="char" viewBox="0 0 200 200" aria-label="mascot">
+  <ellipse cx="100" cy="186" rx="55" ry="7" fill="#14305c" opacity=".12"/>
+  <path d="M100 30 C98 18 108 10 118 14 C112 18 110 24 108 31Z" fill="#5ab0ff" stroke="#14305c" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M100 28 C150 28 172 70 168 118 C165 160 140 182 100 182 C60 182 35 160 32 118 C28 70 50 28 100 28Z" fill="#8fcaff" stroke="#14305c" stroke-width="4"/>
+  <ellipse cx="100" cy="132" rx="40" ry="36" fill="#eaf5ff" stroke="#14305c" stroke-width="3"/>
+  <path d="M72 84 q8 -9 16 0" fill="none" stroke="#14305c" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="122" cy="84" r="6" fill="#14305c"/><circle cx="124" cy="82" r="2" fill="#fff"/>
+  <ellipse cx="62" cy="102" rx="10" ry="6" fill="#ffb3c7" opacity=".75"/>
+  <ellipse cx="142" cy="102" rx="10" ry="6" fill="#ffb3c7" opacity=".75"/>
+  <path d="M92 100 q8 8 16 0" fill="none" stroke="#14305c" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M138 128 q22 -4 24 14 q-2 12 -16 10" fill="#8fcaff" stroke="#14305c" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M158 112 c-6 -10 -20 -2 -12 10 l12 12 l12 -12 c8 -12 -6 -20 -12 -10z" fill="#2f8cff" stroke="#14305c" stroke-width="3" stroke-linejoin="round"/>
+  <ellipse cx="78" cy="180" rx="16" ry="8" fill="#8fcaff" stroke="#14305c" stroke-width="3"/>
+  <ellipse cx="122" cy="180" rx="16" ry="8" fill="#8fcaff" stroke="#14305c" stroke-width="3"/>
+</svg>`;
+
+const charBox = $("charBox");
+const picker = Object.assign(document.createElement("input"), { type: "file", accept: "image/*" });
+function setCharacter(src) {
+  if (!src) { charBox.innerHTML = MASCOT_SVG; }
+  else { charBox.innerHTML = `<img class="char" alt="character" src="${src}">`; }
+  const el = charBox.firstElementChild;
+  el.title = "คลิกเพื่อเปลี่ยนรูป";
+  el.addEventListener("click", () => picker.click());
+  const img = charBox.querySelector("img");
+  if (img) img.onerror = () => { charBox.innerHTML = MASCOT_SVG; charBox.firstElementChild.addEventListener("click", () => picker.click()); };
+}
+picker.addEventListener("change", () => {
+  const f = picker.files && picker.files[0];
+  if (f) setCharacter(URL.createObjectURL(f));
+});
+setCharacter(CHARACTER_SRC);
+
+/* ---------- music ---------- */
+const musicBtn = $("music");
+let audioEl = null, ctx = null, timer = null, playing = false;
+
+function parseYouTubeId(v) {
+  v = (v || "").trim();
+  if (/^[\w-]{11}$/.test(v)) return v;
+  const m = v.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+  return m ? m[1] : "";
+}
+
+let yt = null, ytReady = false;
+const YT_ID = MUSIC_SRC ? "" : parseYouTubeId(YOUTUBE_ID);
+if (YT_ID) {
+  const holder = document.createElement("div");
+  holder.style.cssText = "position:fixed;left:-9999px;top:0;width:200px;height:200px;pointer-events:none";
+  holder.innerHTML = '<div id="ytPlayer"></div>';
+  document.body.appendChild(holder);
+  window.onYouTubeIframeAPIReady = () => {
+    yt = new YT.Player("ytPlayer", {
+      width: 200, height: 200, videoId: YT_ID,
+      playerVars: { playsinline: 1, loop: 1, playlist: YT_ID, controls: 0 },
+      events: {
+        onReady: () => { ytReady = true; if (playing) yt.playVideo(); },
+        onError: () => { setMusic(false); }
+      }
+    });
+  };
+  const tag = document.createElement("script");
+  tag.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(tag);
+}
+
+function setMusic(on) {
+  playing = on;
+  musicBtn.classList.toggle("on", on);
+  $("musicIcon").textContent = on ? "❚❚" : "▶";
+  if (YT_ID) {
+    if (ytReady) { on ? yt.playVideo() : yt.pauseVideo(); }
+    return;
+  }
+  if (MUSIC_SRC) {
+    audioEl = audioEl || Object.assign(new Audio(MUSIC_SRC), { loop: true, volume: .6 });
+    on ? audioEl.play().catch(() => {}) : audioEl.pause();
+  }
+}
+musicBtn.addEventListener("click", () => setMusic(!playing));
+
+/* ---------- screen 1 : yes / no ---------- */
+const yes = $("yes"), no = $("no");
+let noCount = 0;
+function dodge(e) {
+  e.preventDefault();
+  noCount++;
+  const s = Math.max(0.35, 1 - noCount * 0.16);
+  no.style.transform = `scale(${s}) translateX(${noCount % 2 ? 10 : -6}px)`;
+  yes.style.transform = `scale(${Math.min(2.1, 1 + noCount * 0.28)})`;
+  yes.style.margin = `0 ${noCount * 8}px`;
+  if (noCount >= 5) { no.style.opacity = 0; no.style.pointerEvents = "none"; }
+}
+no.addEventListener("click", dodge);
+no.addEventListener("touchstart", dodge, { passive: false });
+
+yes.addEventListener("click", () => {
+  show("s2");
+  const chat = $("chat"), reply = $("replyBtn");
+  chat.innerHTML = ""; reply.style.display = "none";
+  BUBBLES.forEach((t, i) => setTimeout(() => {
+    const b = document.createElement("div");
+    b.className = "bubble"; b.textContent = t;
+    chat.appendChild(b);
+  }, 700 + i * 1000));
+  setTimeout(() => { reply.style.display = ""; reply.style.animation = "pop .35s ease both"; }, 700 + BUBBLES.length * 1000);
+});
+
+/* ---------- screen 2 → 3 ---------- */
+$("replyBtn").addEventListener("click", () => { show("s3"); setTimeout(() => $("from").focus(), 100); });
+
+/* ---------- falling hearts ---------- */
+function rain(n = 60) {
+  const chars = ["♥", "♥", "♥", "❄"];
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement("span");
+    h.className = "heart";
+    h.textContent = chars[Math.floor(Math.random() * chars.length)];
+    h.style.left = Math.random() * 100 + "vw";
+    h.style.fontSize = 10 + Math.random() * 16 + "px";
+    h.style.setProperty("--r", (Math.random() * 360 - 180) + "deg");
+    h.style.animationDuration = 3 + Math.random() * 4 + "s";
+    h.style.animationDelay = Math.random() * 2 + "s";
+    h.style.color = ["#4a9dff", "#7cc0ff", "#2f8cff", "#a9d6ff"][i % 4];
+    document.body.appendChild(h);
+    setTimeout(() => h.remove(), 10000);
+  }
+}
+
+/* ---------- screen 3 : submit ---------- */
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  const fromVal = $("from").value.trim();
+  const msgVal = $("msg").value.trim();
+  const btn = $("sendBtn");
+  
+  btn.disabled = true; 
+  btn.textContent = "กำลังส่งข้อความ... 💙";
+
+  const ok = await onSend({ from: fromVal, message: msgVal });
+  
+  // เนื่องจากไม่ได้ใส่ Web3Forms Key ระบบจะคืนค่า true ทันที (จำลองการส่งสำเร็จ)
+  if (!ok) {
+    btn.disabled = false; 
+    btn.textContent = "ส่งไม่สำเร็จ ลองอีกครั้งนะ 🥲";
+    return;
+  }
+
+  btn.textContent = "ส่งข้อความสำเร็จแล้ว ✓ 💙";
+
+  $("summaryFrom").textContent = fromVal;
+  $("summaryMsg").textContent = msgVal;
+
+  setTimeout(() => {
+    $("mainWin").classList.add("dim");
+    $("modal").classList.add("show");
+    rain(80);
+    setInterval(() => rain(15), 3000);
+  }, 500);
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "closeModalBtn") {
+    $("modal").classList.remove("show");
+    $("mainWin").classList.remove("dim");
+  }
+});
+</script>
+</body>
+</html>
