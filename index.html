@@ -172,68 +172,69 @@
       <section class="screen" id="s3">
         <form class="form" id="form" autocomplete="off">
           <h2 class="mono">SEND MESSAGE</h2>
-          <label for="from">จากใคร (พิมพ์ชื่อตัวเองเลย):</label>
+          <label for="from">From:</label>
           <input id="from" maxlength="40" placeholder="..." required>
-          <label for="msg">ข้อความตอบกลับ:</label>
-          <textarea id="msg" maxlength="500" placeholder="พิมพ์ความในใจมาได้เลยยย..." required></textarea>
-          <button class="btn send" id="sendBtn" type="submit">ส่งข้อความ (Send) 💙</button>
+          <label for="msg">Reply message:</label>
+          <textarea id="msg" maxlength="500" placeholder="feel free to type out what's on your mind..." required></textarea>
+          <button class="btn send" id="sendBtn" type="submit">(Send) 💙</button>
         </form>
       </section>
     </div>
   </div>
 
-  <!-- success -->
+  <!-- success modal -->
   <div class="modal" id="modal">
     <div class="win">
-      <div class="titlebar mono"><span>●</span><span class="t">Success</span></div>
+      <div class="titlebar mono"><span>●</span><span class="t">Status: Message Sent</span></div>
       <div class="inner">
-        <h3>kao rak p t sut</h3>
-        <p>ส่งสำเร็จแล้ว ขอบคุณที่ให้อภัยเค้านะคะ 💙</p>
+        <div style="font-size: 36px; margin-bottom: 8px;">🎉</div>
+        <h3>Message sent successfully!</h3>
+        <p style="margin-bottom: 12px; color: #3b5998;">kao dai rab kwam nai jai p laew naka</p>
+        
+        <!-- กล่องแสดงข้อความสรุปเพิ่มเติม -->
+        <div id="sentSummary" style="background: #ffffff; border: 1.5px dashed var(--ink); border-radius: 8px; padding: 10px; font-size: 11px; text-align: left; word-break: break-word;">
+          <div style="font-weight: bold; color: var(--accent); margin-bottom: 4px;">💌 Message details:</div>
+          <div><b>Form:</b> <span id="summaryFrom">-</span></div>
+          <div><b>Message:</b> <span id="summaryMsg">-</span></div>
+        </div>
+
+        <button class="btn" id="closeModalBtn" type="button" style="margin-top: 14px; width: 100%;">agree</button>
       </div>
     </div>
   </div>
-</main>
 
 <script>
 /* =====================================================================
    ตั้งค่าตรงนี้ได้เลย
    ===================================================================== */
 
-// ใส่รูปตัวการ์ตูนที่ต้องการ (ไฟล์ในโฟลเดอร์เดียวกัน เช่น "doraemon.png" หรือ URL)
-// ถ้าเว้นว่างไว้ จะใช้มาสคอตสีฟ้าที่วาดไว้ให้เป็นตัวแทนก่อน
-// หรือจะคลิกที่ตัวการ์ตูนบนหน้าเว็บเพื่อเลือกรูปจากเครื่องก็ได้ (ใช้ชั่วคราวในหน้านั้น)
 const CHARACTER_SRC = "";
 
-// เพลงจาก YouTube: ใส่ ID ของคลิป (ส่วนหลัง youtu.be/ ก่อนเครื่องหมาย ?)
-// ต้องเปิดหน้านี้ผ่านเว็บ (http/https) YouTube ถึงจะยอมเล่น; เว้นว่างไว้ถ้าไม่ใช้
-const YOUTUBE_ID = "https://youtu.be/py4E_tlNMQ8?si=_B98dK6RelWktVA9";
+// เพลงจาก YouTube: ใส่ลิงก์เต็มหรือรหัสคลิปตรงนี้ได้เลยครับ
+const YOUTUBE_ID = "";
 
-const MUSIC_SRC = "https://youtu.be/py4E_tlNMQ8?si=_B98dK6RelWktVA9";
+// ช่องนี้เว้นว่างไว้ เพราะเราใช้ YouTube ด้านบนแล้ว
+const MUSIC_SRC = "song.mp3";
 
 const BUBBLES = [
- "เค้าขอโทษนะคะ🥹",
-  "ช่วงนี้เค้าทำตัวไม่น่ารักใส่พี่บ่อยครั้ง",
-  "เค้าไม่อยากให้บรรยากาศเป็นแบบนี้แล้วค่ะ",
-  "เค้าง้อๆนะคะ",
-  "พี่คนสวยไม่งอนเค้าแล้วได้มั้ยคะ",
-  "เค้าคิดถึงพี่มากๆเลยนะคะ💙"
+  "เค้าขอโทษนะคะ🥹",
+  "ช่วงนี้เค้าทำตัวไม่น่ารักใส่พี่บ่อยครั้ง",
+  "เค้าไม่อยากให้บรรยากาศเป็นแบบนี้แล้วค่ะ",
+  "เค้าง้อๆนะคะ",
+  "พี่คนสวยไม่งอนเค้าแล้วได้มั้ยคะ",
+  "เค้าคิดถึงเค้าอยากคุยกับพี่มากๆเลยนะคะ"
 ];
 
-// ฟังก์ชันนี้ถูกเรียกตอนกดส่งข้อความ — ต่อกับ API / Google Form / Line Notify ฯลฯ ได้ที่นี่
-// ส่งข้อความเข้าอีเมลผ่าน Web3Forms (ฟรี): ใส่ Access Key ที่ได้รับทางอีเมลตรงนี้
-// วิธีรับ key: เข้า web3forms.com → กรอกอีเมลที่อยากรับข้อความ → ระบบส่ง Access Key ไปให้ทางอีเมล
-const WEB3FORMS_KEY = "chanthidainthisane209@gmail.com";
+const WEB3FORMS_KEY = "";
 
-// คืนค่า true เมื่อส่งสำเร็จ, false เมื่อส่งไม่สำเร็จ
 async function onSend({ from, message }) {
-  // สำรองไว้ในเครื่องของผู้ส่งด้วย
   try {
     const list = JSON.parse(localStorage.getItem("replies") || "[]");
     list.push({ from, message, at: new Date().toISOString() });
     localStorage.setItem("replies", JSON.stringify(list));
   } catch (e) {}
 
-  if (!WEB3FORMS_KEY) return true; // ยังไม่ได้ตั้ง key = โหมดทดลอง (ไม่ส่งอีเมลจริง)
+  if (!WEB3FORMS_KEY) return true; 
   try {
     const res = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
@@ -261,7 +262,7 @@ const show = (id) => {
   $(id).classList.add("active");
 };
 
-/* ---------- mascot (original placeholder) ---------- */
+/* ---------- mascot ---------- */
 const MASCOT_SVG = `
 <svg class="char" viewBox="0 0 200 200" aria-label="mascot">
   <ellipse cx="100" cy="186" rx="55" ry="7" fill="#14305c" opacity=".12"/>
@@ -300,32 +301,15 @@ setCharacter(CHARACTER_SRC);
 const musicBtn = $("music");
 let audioEl = null, ctx = null, timer = null, playing = false;
 
-function startSynth() {
-  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-  ctx.resume();
-  const notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46, 493.88, 587.33, 783.99, 587.33, 523.25, 659.25, 783.99, 1046.5];
-  let i = 0;
-  const tick = () => {
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = "triangle"; o.frequency.value = notes[i++ % notes.length] / 2;
-    g.gain.setValueAtTime(0.0001, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.09, ctx.currentTime + 0.03);
-    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.5);
-    o.connect(g).connect(ctx.destination);
-    o.start(); o.stop(ctx.currentTime + 0.55);
-  };
-  tick(); timer = setInterval(tick, 380);
-}
-/* YouTube (ตัวเล่นซ่อนไว้ ควบคุมผ่านปุ่ม music) */
-let yt = null, ytReady = false;
-// รับได้ทั้งรหัสคลิป หรือลิงก์เต็ม (youtu.be/..., youtube.com/watch?v=..., /shorts/..., /embed/...)
 function parseYouTubeId(v) {
   v = (v || "").trim();
   if (/^[\w-]{11}$/.test(v)) return v;
   const m = v.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
   return m ? m[1] : "";
 }
-const YT_ID = MUSIC_SRC ? "" : parseYouTubeId(YOUTUBE_ID); // ถ้าตั้ง MUSIC_SRC ไว้ จะใช้ mp3 ก่อนเสมอ
+
+let yt = null, ytReady = false;
+const YT_ID = MUSIC_SRC ? "" : parseYouTubeId(YOUTUBE_ID);
 if (YT_ID) {
   const holder = document.createElement("div");
   holder.style.cssText = "position:fixed;left:-9999px;top:0;width:200px;height:200px;pointer-events:none";
@@ -357,8 +341,6 @@ function setMusic(on) {
   if (MUSIC_SRC) {
     audioEl = audioEl || Object.assign(new Audio(MUSIC_SRC), { loop: true, volume: .6 });
     on ? audioEl.play().catch(() => {}) : audioEl.pause();
-  } else {
-    if (on) startSynth(); else { clearInterval(timer); timer = null; }
   }
 }
 musicBtn.addEventListener("click", () => setMusic(!playing));
@@ -414,19 +396,41 @@ function rain(n = 60) {
 /* ---------- screen 3 : submit ---------- */
 $("form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  
+  const fromVal = $("from").value.trim();
+  const msgVal = $("msg").value.trim();
   const btn = $("sendBtn");
-  btn.disabled = true; btn.textContent = "กำลังส่งข้อความ... 💙";
-  const ok = await onSend({ from: $("from").value.trim(), message: $("msg").value.trim() });
+  
+  btn.disabled = true; 
+  btn.textContent = "กำลังส่งข้อความ... 💙";
+
+  const ok = await onSend({ from: fromVal, message: msgVal });
+  
+  // เนื่องจากไม่ได้ใส่ Web3Forms Key ระบบจะคืนค่า true ทันที (จำลองการส่งสำเร็จ)
   if (!ok) {
-    btn.disabled = false; btn.textContent = "ส่งไม่สำเร็จ ลองอีกครั้งนะ 🥲";
+    btn.disabled = false; 
+    btn.textContent = "ส่งไม่สำเร็จ ลองอีกครั้งนะ 🥲";
     return;
   }
+
+  btn.textContent = "ส่งข้อความสำเร็จแล้ว ✓ 💙";
+
+  $("summaryFrom").textContent = fromVal;
+  $("summaryMsg").textContent = msgVal;
+
   setTimeout(() => {
     $("mainWin").classList.add("dim");
     $("modal").classList.add("show");
-    rain(70);
-    setInterval(() => rain(14), 3500);
-  }, 600);
+    rain(80);
+    setInterval(() => rain(15), 3000);
+  }, 500);
+});
+
+document.addEventListener("click", (e) => {
+  if (e.target && e.target.id === "closeModalBtn") {
+    $("modal").classList.remove("show");
+    $("mainWin").classList.remove("dim");
+  }
 });
 </script>
 </body>
